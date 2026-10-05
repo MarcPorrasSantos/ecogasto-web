@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EcoGasto: controla el consumo de agua, luz, gas y transporte de tu hogar.">
+  <title>EcoGasto</title>
+
+  
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Nunito:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="CSS/EcoGasto.css">
+  <link rel="stylesheet" href="CSS/sesionEcoGasto.css">
+
+
+  <style>
+    :root {
+      --verde:          #4CAF50;
+      --verde-oscuro:   #2E7D32;
+      --verde-profundo: #1B5E20;
+      --azul:           #03A9F4;
+      --amarillo:       #FFC107;
+      --gris-claro:     #F5F5F5;
+      --gris-borde:     #CECECE;
+      --rojo:           #C62828;
+      --texto:          #2B332B;
+      --texto-suave:    #6B756B;
+    }
+
+    [hidden] { display: none !important; }
+
+    
+    body {
+      display: block;
+      background-color: #e8f5e8;
+    }
+
+    html { scroll-behavior: smooth; }
+    .SesionEcoGasto, .Modulos_Que_Ofrecemos { scroll-margin-top: 110px; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+    }
+
+    :focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+
+  
+
+    .form-box.register .input-box { margin: 20px 0; }
+    .form-box.register h1 { margin-bottom: 4px; }
+    .form-box.register .error-msg { font-size: 12px; bottom: -1.1rem; }
+
+    .input-box .terminos {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 14px; color: #333;
+    }
+    .input-box .terminos input { width: auto; padding: 0; }
+    .input-box .terminos a { color: var(--verde-oscuro); text-decoration: underline; }
+
+    .form-box .form-msg { font-size: 14px; margin: 0 0 12px; min-height: 0; }
+    .form-msg.error { color: var(--rojo); }
+    .form-msg.ok    { color: var(--verde-oscuro); }
+    .form-msg.info  { color: #01579B; }
+
+    @media (max-width: 650px) {
+      .form-box { overflow-y: auto; }
+      .form-box.register .input-box { margin: 14px 0; }
+    }
+
+    /* Grafico de ejemplo de la landing (P02) */
+    #GraficoDemo { width: min(680px, 92vw); }
+    #GraficoDemo h3 { color: var(--verde-profundo); margin: 0 30px 10px 0; }
+    .grafico-demo-caja { position: relative; height: 320px; }
+    .nota-demo { font-size: 13px; color: #666; margin-top: 10px; }
+
+    .contenido-alerta .acciones-alerta { display: flex; gap: 10px; justify-content: center; }
+    .btn-secundario {
+      background: #fff; color: var(--verde-profundo); border: 1px solid var(--gris-borde);
+      padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 1rem;
+    }
+
+   
+
+    #PrincipalEcoGasto *,
+    #socialMediaModal *,
+    #FormularioHogarModal * { font-family: 'Nunito', 'Segoe UI', sans-serif; }
+
+    #PrincipalEcoGasto h1, #PrincipalEcoGasto h2, #PrincipalEcoGasto h3,
+    #socialMediaModal h3, #FormularioHogarModal h2,
+    .kpi-valor, .app-marca { font-family: 'Poppins', sans-serif; }
+
+    .tabla-app, .tabla-app * { font-family: 'Roboto', sans-serif !important; }
+
+    /* EcoGasto.css da margenes grandes a todos los <p> de esta seccion */
+    #PrincipalEcoGasto p  { font-size: 15px; margin-bottom: 0; }
+    #PrincipalEcoGasto h1 { font-size: 26px; color: var(--verde-profundo); margin-bottom: 4px; }
+    #PrincipalEcoGasto h2 {
+      font-size: 19px; color: var(--verde-profundo); font-weight: 600;
+      margin: 0 0 12px; display: block;
+    }
+
+    /* Controles de formulario */
+    #PrincipalEcoGasto select,
+    #PrincipalEcoGasto input[type="number"],
+    #PrincipalEcoGasto input[type="text"],
+    #FormularioHogarModal select,
+    #FormularioHogarModal input[type="number"] {
+      padding: 9px 12px; border: 1px solid var(--gris-borde); border-radius: 8px;
+      background: #fff; font-size: 15px; color: var(--texto);
+    }
+
+    /* --- Barra superior --- */
+    .app-barra {
+      display: flex; align-items: center; gap: 18px;
+      padding: 12px 28px; background: #fff;
+      border-bottom: 1px solid var(--gris-borde);
+      box-shadow: 0 2px 8px rgba(27, 94, 32, 0.06);
+    }
+    .app-menu { position: relative; }
+    #menu-items { min-width: 240px; z-index: 60; padding: 8px; gap: 2px; box-shadow: 0 10px 24px rgba(0,0,0,.2); }
+    #menu-items button,
+    #menu-items #btnCerrarSesion {
+      width: 100%; text-align: left; background: none; border: none; color: #fff;
+      padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 15px;
+    }
+    #menu-items button:hover,
+    #menu-items #btnCerrarSesion:hover { background: rgba(255, 255, 255, 0.14); }
+
+    .app-marca {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 600; font-size: 20px; color: var(--verde-profundo);
+    }
+    .app-marca img { width: 36px; height: 36px; object-fit: contain; }
+
+    .app-nav { flex: 1; display: flex; justify-content: center; }
+    .app-nav ul { display: flex; gap: 6px; flex-wrap: wrap; }
+    .app-nav button {
+      background: none; border: none; padding: 9px 15px; border-radius: 999px;
+      cursor: pointer; color: var(--texto); font-weight: 700; font-size: 15px;
+    }
+    .app-nav button:hover { background: #E8F5E9; }
+    .app-nav button.activo { background: var(--verde-oscuro); color: #fff; }
+
+    .app-campana {
+      position: relative; background: #fff; border: 1px solid var(--gris-borde);
+      border-radius: 50%; width: 42px; height: 42px; font-size: 19px; cursor: pointer;
+    }
+    .app-badge {
+      position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px;
+      padding: 0 5px; border-radius: 999px; background: var(--rojo); color: #fff;
+      font-size: 12px; font-weight: 700; line-height: 20px;
+    }
+    .app-usuario { font-size: 13px; color: var(--texto-suave); text-align: right; line-height: 1.3; }
+    .app-usuario strong { display: block; color: var(--verde-profundo); font-size: 15px; }
+
+    /* --- Vistas: solo una visible a la vez --- */
+    #PrincipalEcoGasto .app-vista {
+      display: none; max-width: 1140px; margin: 26px auto 70px; padding: 0 22px;
+      background: transparent; box-shadow: none; border-radius: 0; text-align: left;
+    }
+    #PrincipalEcoGasto .app-vista.activa { display: block; animation: fadeIn .35s ease; }
+
+    .app-encabezado {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;
+      justify-content: space-between; margin-bottom: 20px;
+    }
+    #PrincipalEcoGasto .app-encabezado p { color: var(--texto-suave); max-width: 72ch; }
+
+    .app-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-bottom: 20px; }
+    .app-hero img {
+      width: 92px; height: 92px; border-radius: 50%; object-fit: cover;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); background: #dcedc8;
+    }
+    .app-hero-texto { flex: 1; min-width: 220px; }
+    #PrincipalEcoGasto .app-hero-texto p { color: var(--texto-suave); }
+
+    .controles { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .controles label { font-size: 14px; font-weight: 700; color: var(--verde-profundo); }
+
+    .app-bloque {
+      background: #fff; border: 1px solid var(--gris-borde); border-radius: 10px;
+      padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(27, 94, 32, 0.06);
+    }
+    .bloque-cabecera {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    #PrincipalEcoGasto .bloque-cabecera h2 { margin: 0; }
+    #PrincipalEcoGasto .bloque-nota { font-size: 14px; color: var(--texto-suave); margin-bottom: 14px; }
+
+    .consumo-layout {
+      display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(290px, 1fr);
+      gap: 20px; align-items: start;
+    }
+    .grafico-caja { position: relative; height: 320px; }
+
+    /* --- Indicadores --- */
+    .kpis {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .kpi {
+      background: #fff; border: 1px solid var(--gris-borde); border-top: 4px solid var(--verde);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .kpi--azul     { border-top-color: var(--azul); }
+    .kpi--amarillo { border-top-color: var(--amarillo); }
+    .kpi--rojo     { border-top-color: var(--rojo); }
+    .kpi-valor { font-size: 24px; font-weight: 600; color: var(--verde-profundo); line-height: 1.2; }
+    .kpi-etiqueta { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+
+    /* --- Tarjetas de servicio (P05) --- */
+    .recursos-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .recurso-card {
+      background: #fff; border: 1px solid var(--gris-borde); border-radius: 12px;
+      padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .recurso-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); }
+    .recurso-card.seleccionada { border: 2px solid var(--verde); }
+    .recurso-card.sin-servicio { opacity: .65; cursor: default; background: #FAFAFA; }
+    .recurso-card.sin-servicio:hover { transform: none; box-shadow: none; }
+    .rc-cabecera { display: flex; align-items: center; justify-content: space-between; }
+    .rc-nombre { font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 17px; }
+    .rc-icono { font-size: 26px; }
+    .rc-valor { font-size: 22px; font-weight: 700; color: var(--verde-profundo); }
+    .rc-detalle { font-size: 13px; color: var(--texto-suave); }
+    .rc-acciones { margin-top: 8px; }
+
+    .nivel { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .nivel--bajo     { background: #E8F5E9; color: var(--verde-profundo); }
+    .nivel--moderado { background: #FFF8E1; color: #8D6E00; }
+    .nivel--alto     { background: #FFEBEE; color: var(--rojo); }
+    .nivel--neutro   { background: #EEEEEE; color: var(--texto-suave); }
+
+    /* --- Formularios --- */
+    .campo { margin-bottom: 14px; }
+    .campo > label, .campo-titulo {
+      display: block; font-weight: 700; font-size: 14px;
+      color: var(--verde-profundo); margin-bottom: 5px;
+    }
+    .campo select, .campo input[type="number"], .campo input[type="text"] { width: 100%; }
+    .campo-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .campo-ayuda { display: block; font-size: 12.5px; color: var(--texto-suave); margin-top: 4px; }
+    .unidad { font-weight: 400; color: var(--texto-suave); }
+    .casillas { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+    .casillas label, .casilla-simple {
+      display: flex; align-items: center; gap: 7px; font-size: 15px; color: var(--texto); cursor: pointer;
+    }
+    .casilla-simple { font-weight: 700; }
+    .form-acciones { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+    #PrincipalEcoGasto .form-msg, #FormularioHogarModal .form-msg { font-size: 14px; margin: 4px 0 10px; }
+    #PrincipalEcoGasto .costo-preview { font-size: 14px; color: #01579B; margin: -4px 0 10px; }
+
+    .btn-app {
+      border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; cursor: pointer;
+      background: var(--verde-oscuro); color: #fff; font-size: 15px; transition: background .18s;
+    }
+    .btn-app:hover { background: var(--verde-profundo); }
+    .btn-app:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-app--claro { background: #fff; color: var(--verde-oscuro); border: 1px solid var(--gris-borde); }
+    .btn-app--claro:hover { background: #F1F8E9; }
+    .btn-app--peligro { background: var(--rojo); }
+    .btn-app--peligro:hover { background: #8E1F1F; }
+    .btn-app--pequeno { padding: 5px 10px; font-size: 13px; }
+
+    /* --- Tablas --- */
+    .tabla-scroll { overflow-x: auto; border: 1px solid var(--gris-borde); border-radius: 8px; }
+    .tabla-app { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+    .tabla-app th {
+      background: var(--verde-profundo); color: #fff; text-align: left;
+      padding: 10px 12px; font-weight: 500; white-space: nowrap;
+    }
+    .tabla-app td { padding: 9px 12px; border-top: 1px solid var(--gris-borde); vertical-align: middle; }
+    .tabla-app tbody tr:nth-child(even) { background: #FAFCFA; }
+    .tabla-app .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tabla-app .acciones { display: flex; gap: 6px; }
+    .dif-mas   { color: var(--rojo); font-weight: 700; }
+    .dif-menos { color: var(--verde-oscuro); font-weight: 700; }
+
+    .vacio { text-align: center; padding: 28px 16px; color: var(--texto-suave); }
+    .aviso-app {
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;
+      background: #E1F5FE; color: #01579B; border-left: 4px solid var(--azul);
+    }
+    .aviso-app--alerta { background: #FFF8E1; color: #8D6E00; border-left-color: var(--amarillo); }
+
+    /* --- Eco Tips (P07) --- */
+    .tip-principal { text-align: center; background: #EAFAF1; }
+    .tip-meta {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+      margin-bottom: 14px; font-size: 14px; color: var(--texto-suave);
+    }
+    .etiqueta-origen { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .etiqueta-origen--ia       { background: #E1F5FE; color: #01579B; }
+    .etiqueta-origen--catalogo { background: #E8F5E9; color: var(--verde-profundo); }
+    #PrincipalEcoGasto #texto-tip {
+      font-size: 18px; margin-bottom: 18px; max-width: 700px; text-align: left; white-space: pre-line;
+    }
+    #PrincipalEcoGasto .acciones-tip { margin-bottom: 8px; }
+    .lista-tips li {
+      padding: 10px 14px; background: var(--gris-claro); border-left: 4px solid var(--verde);
+      border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 14.5px;
+    }
+    .lista-tips li small { display: block; color: var(--texto-suave); margin-top: 3px; }
+
+    /* --- Notificaciones (P08) y preferencias (P09) --- */
+    .noti-card {
+      border: 1px solid var(--gris-borde); border-radius: 8px; padding: 12px 14px;
+      margin-bottom: 10px; background: #fff;
+    }
+    .noti-card.no-leida { background: #F1F8E9; border-left: 4px solid var(--verde); }
+    .noti-card.no-leida.alerta { background: #FFF8E1; border-left-color: var(--amarillo); }
+    .noti-card strong { color: var(--verde-profundo); }
+    .noti-card small { color: var(--texto-suave); }
+    #formPreferencias fieldset {
+      border: 1px solid var(--gris-borde); border-radius: 8px; padding: 10px 16px 6px; margin-bottom: 14px;
+    }
+    #formPreferencias legend { font-weight: 700; color: var(--verde-profundo); padding: 0 6px; }
+
+    /* --- Estadisticas locales (P11) --- */
+    .grid-estadisticas {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;
+    }
+    .grid-estadisticas .app-bloque { margin-bottom: 0; }
+    .grid-estadisticas .grafico-caja { height: 240px; }
+    #PrincipalEcoGasto .grid-estadisticas h3 { font-size: 16px; color: var(--verde-profundo); margin-bottom: 8px; }
+
+    .mensaje-comparacion { margin-top: 14px !important; font-style: italic; color: #555; }
+
+    /* --- Mensaje flotante --- */
+    .toast-usuario {
+      position: fixed; right: 20px; bottom: 60px; background: var(--verde-profundo); color: #fff;
+      padding: 12px 18px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      z-index: 11000; max-width: 380px; transform: translateY(200%); transition: transform .28s ease;
+    }
+    .toast-usuario.visible { transform: translateY(0); }
+    .toast-usuario.alerta  { background: #8D6E00; }
+    .toast-usuario.error   { background: var(--rojo); }
+
+    /* --- Modales de hogar y terminos --- */
+    .contenido-formulario { max-height: 90vh; overflow-y: auto; }
+    .contenido-formulario h2 { font-size: 22px; color: var(--verde-profundo); margin-bottom: 6px; }
+    .nota-modal { font-size: 14px; color: var(--texto-suave); margin-bottom: 16px; }
+    .lista-terminos { margin: 0 0 18px 20px; }
+    .lista-terminos li { list-style: decimal; margin-bottom: 8px; font-size: 14.5px; color: #333; }
+
+    @media (max-width: 900px) {
+      .consumo-layout { grid-template-columns: 1fr; }
+      .app-barra { flex-wrap: wrap; padding: 10px 14px; }
+      .app-nav { order: 5; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; }
+      .app-usuario { display: none; }
+    }
+    @media (max-width: 600px) {
+      .campo-fila { grid-template-columns: 1fr; }
+      .grafico-caja { height: 260px; }
+    }
+
+    
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); display: flex;
+      justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-container {
+      background-color: white; border-radius: 15px; width: 90%; max-width: 1200px;
+      height: 85%; max-height: 800px; position: relative; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white;
+      padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .modal-title { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+    .modal-puntos {
+      margin-left: auto; background: rgba(255, 255, 255, 0.2);
+      padding: 4px 14px; border-radius: 999px; font-weight: 700;
+    }
+    .close-btn {
+      background: none; border: none; color: white; font-size: 28px; cursor: pointer;
+      padding: 0 8px; border-radius: 50%; transition: background-color 0.3s;
+    }
+    .close-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+    .tab-navigation { display: flex; background-color: #f5f5f5; border-bottom: 1px solid #ddd; overflow-x: auto; }
+    .tab-btn {
+      flex: 1; padding: 15px 20px; background: none; border: none; cursor: pointer;
+      font-size: 16px; transition: all 0.3s; border-bottom: 3px solid transparent; white-space: nowrap;
+    }
+    .tab-btn.active { background-color: white; border-bottom-color: #4CAF50; color: #4CAF50; font-weight: bold; }
+    .tab-btn:hover { background-color: #e8f5e8; }
+
+    .tab-content { padding: 20px; height: calc(100% - 140px); overflow-y: auto; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .nota-tab { font-size: 14px; color: var(--texto-suave); margin: 0 0 14px; }
+    .subtitulo-tab { color: var(--verde-oscuro); margin: 22px 0 10px; font-size: 17px; }
+
+    /* Logros */
+    .achievement-card {
+      background: linear-gradient(135deg, #e8f5e8, #c8e6c9); border-radius: 12px;
+      padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .achievement-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; }
+    .achievement-title { font-size: 20px; font-weight: bold; color: #2E7D32; }
+    .achievement-date { color: #666; font-size: 14px; }
+    .achievement-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; margin-bottom: 16px;
+    }
+    .stat-item { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    .stat-value { font-size: 24px; font-weight: bold; color: #4CAF50; }
+    .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+
+    .share-buttons { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    .share-btn {
+      padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold;
+      transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .share-whatsapp  { background-color: #25D366; color: white; }
+    .share-facebook  { background-color: #1877F2; color: white; }
+    .share-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; }
+    .share-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+
+    /* Comunidad */
+    .fila-publicar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .fila-publicar input[type="url"] { flex: 1 1 240px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; }
+    .contador-caracteres { font-size: 12px; color: var(--texto-suave); }
+    .comment-header .comment-autor { color: var(--verde-oscuro); }
+    .comment-actions .comment-borrar { margin-left: auto; color: var(--rojo); }
+    .comment-card.propia { border-left: 4px solid var(--verde); }
+
+    /* Fotos */
+    .photo-upload-area {
+      border: 2px dashed #4CAF50; border-radius: 12px; padding: 34px; text-align: center;
+      background-color: #f9f9f9; margin-bottom: 20px; cursor: pointer; transition: all 0.3s;
+    }
+    .photo-upload-area:hover, .photo-upload-area.dragover { background-color: #e8f5e8; border-color: #2E7D32; }
+    .upload-icon { font-size: 44px; color: #4CAF50; margin-bottom: 10px; }
+    .foto-nueva {
+      display: grid; grid-template-columns: 200px 1fr; gap: 16px; margin-bottom: 20px;
+      background: #f9f9f9; padding: 14px; border-radius: 12px;
+    }
+    .foto-nueva img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
+    .foto-nueva textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 6px; }
+    .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .photo-item {
+      position: relative; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); transition: transform 0.3s;
+    }
+    .photo-item:hover { transform: scale(1.03); }
+    .photo-item img { width: 100%; height: 200px; object-fit: cover; display: block; background: #dcedc8; }
+    .photo-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); color: white; padding: 15px; font-size: 14px;
+    }
+
+    /* Resumen */
+    .summary-card {
+      background: linear-gradient(135deg, #4CAF50, #81C784); color: white;
+      border-radius: 15px; padding: 30px; margin-bottom: 20px; text-align: center;
+    }
+    .summary-title { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+    .summary-period { font-size: 16px; opacity: 0.9; margin-bottom: 26px; }
+    .summary-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px;
+    }
+    .summary-stat { background: rgba(255, 255, 255, 0.2); padding: 20px; border-radius: 10px; }
+    .summary-stat-value { font-size: 30px; font-weight: bold; margin-bottom: 5px; }
+    .summary-stat-label { font-size: 14px; opacity: 0.9; }
+    .summary-variacion { font-size: 17px; margin: 0 0 22px; }
+    .summary-acciones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .download-btn {
+      background: white; color: #4CAF50; border: none; padding: 10px 24px; border-radius: 25px;
+      font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.3s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .download-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+    .resumen-bloque { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); }
+    .resumen-bloque h3 { color: #2E7D32; margin-bottom: 14px; }
+    .resumen-comparativa { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .resumen-mes { text-align: center; padding: 14px; background: #f8f9fa; border-radius: 8px; }
+    .resumen-mes.actual { background: #e8f5e8; border: 2px solid #4CAF50; }
+    .resumen-mes strong { display: block; color: #2E7D32; font-size: 16px; }
+    .resumen-mes span { font-size: 14px; color: #666; }
+
+    /* Retos e insignias */
+    #reto .reto-card h3 { font-size: 17px; }
+    .reto-meta { font-size: 13px; color: var(--texto-suave); margin: 6px 0; }
+    .estado-reto { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .estado-reto--disponible { background: #E1F5FE; color: #01579B; }
+    .estado-reto--curso      { background: #FFF8E1; color: #8D6E00; }
+    .estado-reto--completado { background: #E8F5E9; color: var(--verde-profundo); }
+    .acciones-reto { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+    #insigniasContainer { padding: 0 24px 24px; }
+    .insignia-card .insignia-icono { font-size: 42px; display: block; margin-bottom: 6px; }
+    .insignia-card.bloqueada { opacity: .5; filter: grayscale(1); }
+    .insignia-card small { display: block; color: var(--texto-suave); font-size: 12px; }
+
+    /* Ranking */
+    .ranking-filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px; }
+    .rank-avatar {
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      background: var(--verde); color: #fff; font-weight: 700; font-size: 15px;
+    }
+    .rank-meta { display: block; font-size: 12px; color: var(--texto-suave); }
+    #miPosicionRanking { padding: 0 20px; }
+
+    @media (max-width: 768px) {
+      .modal-container { width: 95%; height: 95%; }
+      .achievement-stats, .summary-stats { grid-template-columns: 1fr 1fr; }
+      .foto-nueva { grid-template-columns: 1fr; }
+      .rank-bar-bg { display: none; }
+    }
+  </style>
+</head>
+
+
+<body>
+
+
+
+<header class="MenuNavegador" id="MenuLanding">
+
+  <div class="ContenedorLogo">
+    <div class="logo">
+      <img src="Imagenes/LOGO.png" alt="Logo de EcoGasto" class="logo-img">
+    </div>
+    <div class="logoTexto">
+      <h1>EcoGasto</h1>
+      <p>No heredamos la Tierra de nuestros antepasados,<br> la tomamos prestada de nuestros hijos.</p>
+    </div>
+  </div>
+
+  <nav aria-label="Navegacion principal">
+    <ul class="nav-links">
+      <li><a href="#Inicio">Inicio</a></li>
+      <li><a href="#Modulos">¿Cómo funciona?</a></li>
+      <li><a href="#SesionEcoGasto">Regístrate</a></li>
+      <li><a href="Admin.html" id="EnlaceAdmin">Administración</a></li>
+    </ul>
+  </nav>
+
+  <!-- Antes era un <label for="foto_perfil"> apuntando a un input con otro id.
+       Para un visitante lo util es ir al inicio de sesion. -->
+  <a href="#SesionEcoGasto" class="ContenedorFotoPerfil" title="Iniciar sesión">
+    <img src="Imagenes/Perfil.png" alt="Iniciar sesión" class="avatar-img">
+  </a>
+
+</header>
+
+
+<main>
+
+  <!-- ===== P01 · Bienvenida, Sobre nosotros, Mision y Vision ===== -->
+  <section class="Bienvenida" id="Inicio">
+
+    <div class="contenedor-tarjetas">
+      <div class="tarjetaSobreNosotros">
+        <img src="Imagenes/SobreNosotros.jpg" alt="Familia revisando su consumo">
+        <h1>Sobre Nosotros</h1>
+        <p>EcoGasto es una plataforma inteligente que ayuda a las<br> familias peruanas a tomar control de su consumo diario de<br> agua, luz, gas y transporte.</p>
+      </div>
+
+      <div class="Mision">
+        <img src="Imagenes/Mision.jpg" alt="Ahorro en el hogar">
+        <h1>Misión</h1>
+        <p>Ayudamos a las familias a ahorrar y vivir de forma más sostenible,<br> con tecnología que hace visible lo invisible.</p>
+      </div>
+
+      <div class="Vision">
+        <img src="Imagenes/Vision.jpg" alt="Futuro sostenible">
+        <h1>Visión</h1>
+        <p>Construir un futuro donde cada hogar peruano sea consciente,<br> eficiente y sostenible gracias al poder de la tecnología y de la<br> responsabilidad ecológica.</p>
+      </div>
+    </div>
+
+    <div class="BtnEmpiezaCmabio">
+      <p class="txtEmpiezaCmabio">¿Estás listo para ahorrar más y vivir mejor?</p>
+      <div>
+        <a href="#SesionEcoGasto" class="BtnEmpCambio">Empieza el cambio</a>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ===== P01 / P02 · ¿Como funciona? y tarjetas de consumo de ejemplo ===== -->
+  <section class="Modulos_Que_Ofrecemos" id="Modulos">
+
+    <div class="BotonesXconsumo">
+      <a href="#" class="btn1"><div class="texto">📈 Mi Consumo</div></a>
+      <a href="#" class="btn2"><div class="texto">🚨 Eco Alertas</div></a>
+      <a href="#" class="btn3"><div class="texto">💡 Eco Tips</div></a>
+      <a href="#" class="btn4"><div class="texto">👨‍👩‍👧 Hogar</div></a>
+    </div>
+
+    <div class="ContenedorConocenos">
+
+      <div class="ImgConsumo" id="ImgConsumo">
+        <video class="videoC" autoplay muted loop playsinline>
+          <source src="Imagenes/VIDEO_SECCION2.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="DetalleConsumoOculto" id="DetalleConsumo">
+        <div class="ImagenBt1">
+          <img src="Imagenes/btn1.jpg" class="imgBanner" alt="Control del consumo">
+        </div>
+        <div class="Btn1Texto">
+          <p class="EncabezadoBt1">Ahorra más y vive mejor con EcoGasto</p>
+          <h2>Control Inteligente de Consumo</h2>
+          <p class="txtBt1">Controla y compara tu consumo mensual de agua, luz, gas y transporte.<br>
+            Pulsa una tarjeta para ver un ejemplo del gráfico que tendrás al registrarte.</p>
+        </div>
+      </div>
+
+      <div class="DetalleTarjetasConsumoOculto" id="DetalleTarjetas">
+
+        <button class="TarjetaConsumo" data-recurso="Luz" type="button">
+          <img src="Imagenes/IconLuz.png" alt="" class="IconoLuz">
+          <h3>⚡ Tu ahorro empieza al<br> encender el foco</h3>
+          <p>El 60% del consumo eléctrico en casa viene de<br>
+             electrodomésticos ineficientes. EcoGasto te<br>
+             sugiere alternativas y hábitos para gastar menos.</p>
+        </button>
+
+        <button class="TarjetaConsumo" data-recurso="Agua" type="button">
+          <h3>¿Cuánta agua usas realmente?</h3>
+          <p>Una ducha 🚿 de 10 minutos consume<br>
+             hasta 200 litros de agua. Con EcoGasto,<br>
+             identifica excesos y reduce tu gasto hídrico.</p>
+          <br>
+          <img src="Imagenes/IconAgua.png" alt="" class="IconoAgua">
+        </button>
+
+        <button class="TarjetaConsumo" data-recurso="Gas" type="button">
+          <img src="Imagenes/IconGas.png" alt="" class="IconoGas">
+          <h3>🔥 Controla tu cocina y tu bolsillo</h3>
+          <p>El mal uso del gas encarece tus cuentas y<br>
+             eleva tu huella ambiental. Con EcoGasto, conoce<br>
+             patrones de uso y recibe consejos personalizados.</p>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== P03 · Inicio de sesion y registro  (HU01, HU02) ===== -->
+  <section class="SesionEcoGasto" id="SesionEcoGasto">
+    <div class="container">
+
+      <!-- Inicio de sesion -->
+      <div class="form-box login">
+        <form id="loginForm" novalidate>
+          <h1>Inicia Sesión</h1>
+
+          <div class="input-box">
+            <input type="text" placeholder="Usuario" required id="login-usuario" autocomplete="username" aria-label="Usuario">
+            <i class='bx bxs-user'></i>
+          </div>
+
+          <div class="input-box">
+            <input type="password" placeholder="Contraseña" required id="login-contrasena" autocomplete="current-password" aria-label="Contraseña">
+            <i class='bx bxs-lock-alt'></i>
+          </div>
+
+          <p class="form-msg" id="msg-login" role="alert"></p>
+
+          <div class="forgot-link">
+            <a href="#" id="linkOlvide">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <button type="submit" class="btn">Inicia Sesión</button>
+          <p>Tras 5 intentos fallidos la cuenta se bloquea y solo el administrador puede desbloquearla.</p>
+        </form>
+      </div>
+
+      <!-- Registro -->
+      <div class="form-box register">
+        <form id="registerForm" novalidate>
+          <h1>Registrarse</h1>
+
+          <div class="input-box">
+            <input type="text" placeholder="Usuario (4 a 40 caracteres)" required minlength="4" maxlength="40"
+                   id="registro-usuario" autocomplete="username" aria-label="Usuario">
+            <i class='bx bxs-user'></i>
+            <span class="error-msg" id="err-usuario"></span>
+          </div>
+
+          <div class="input-box">
+            <input type="email" placeholder="Email" required id="registro-email" autocomplete="email" aria-label="Email">
+            <i class='bx bxs-envelope'></i>
+            <span class="error-msg" id="err-email"></span>
+          </div>
+
+          <div class="input-box">
+            <input type="password" placeholder="Contraseña" required id="registro-contrasena" autocomplete="new-password" aria-label="Contraseña">
+            <i class='bx bxs-lock-alt'></i>
+            <span class="error-msg" id="err-contrasena"></span>
+          </div>
+
+          <div class="input-box">
+            <input type="password" placeholder="Confirmar contraseña" required id="registro-confirmar" autocomplete="new-password" aria-label="Confirmar contraseña">
+            <i class='bx bxs-lock-alt'></i>
+            <span class="error-msg" id="err-confirmar"></span>
+          </div>
+
+          <div class="input-box">
+            <label class="terminos">
+              <input type="checkbox" id="registro-terms">
+              Acepto los <a href="#" id="linkTerminos">términos y condiciones</a>
+            </label>
+            <span class="error-msg" id="err-terms"></span>
+          </div>
+
+          <button type="submit" class="btn">Registrarse</button>
+          <p class="form-msg ok" id="reg-success" hidden>¡Registro exitoso! Ya puedes iniciar sesión.</p>
+        </form>
+      </div>
+
+      <!-- Paneles para alternar entre inicio de sesion y registro -->
+      <div class="toggle-box">
+        <div class="toggle-panel toggle-left">
+          <h1>¡Hola!</h1>
+          <p>¿No tienes cuenta?</p>
+          <button type="button" class="btn register-btn">Regístrate</button>
+        </div>
+        <div class="toggle-panel toggle-right">
+          <h1>¡Bienvenido de nuevo!</h1>
+          <p>¿Ya tienes cuenta?</p>
+          <button type="button" class="btn login-btn">Inicia Sesión</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+
+
+
+
+<section id="PrincipalEcoGasto" style="display:none;" aria-label="Aplicación EcoGasto">
+
+  <header class="app-barra">
+
+    <div class="app-menu">
+      <button type="button" id="toggle-menu" class="hamburguesa" aria-label="Abrir menú"
+              aria-expanded="false" aria-controls="menu-items">☰</button>
+      <ul id="menu-items" class="oculto">
+        <li><button type="button" id="btnEditarHogar">🏡 Mi hogar</button></li>
+        <li><button type="button" id="btnEstadisticasHamburger" data-ir="estadisticas">📈 Estadísticas locales</button></li>
+        <li><button type="button" id="btnNotificaciones" data-ir="notificaciones">🔔 Notificaciones</button></li>
+        <li><button type="button" id="btnSocial">🌐 Social Media</button></li>
+        <li><button type="button" id="btnCerrarSesion">🚪 Cerrar sesión</button></li>
+      </ul>
+    </div>
+
+    <div class="app-marca">
+      <img src="Imagenes/LOGO.png" alt="">EcoGasto
+    </div>
+
+    <nav class="app-nav" aria-label="Secciones">
+      <ul>
+        <li><button type="button" id="btnVolverConsumo" data-ir="consumo" class="activo">Mi Consumo</button></li>
+        <li><button type="button" id="btnImpactoAmbiental" data-ir="impacto">Impacto</button></li>
+        <li><button type="button" id="btnEcoTips" data-ir="tips">Tips</button></li>
+        <li><button type="button" id="btnCompararHogares" data-ir="comparar">Comparar Hogares</button></li>
+      </ul>
+    </nav>
+
+    <button type="button" class="app-campana" id="btnCampana" data-ir="notificaciones" aria-label="Notificaciones">
+      🔔<span class="app-badge" id="contadorNotif" hidden>0</span>
+    </button>
+
+    <div class="app-usuario">
+      <span>Sesión de</span>
+      <strong id="nombreUsuarioBarra">—</strong>
+    </div>
+  </header>
+
+
+  <!-- ===== P05 · Mi Consumo  (HU04, HU05, HU08) ===== -->
+  <div class="app-vista activa" id="VistaConsumo" data-vista="consumo">
+
+    <div class="app-hero">
+      <img src="Imagenes/ContenidoCentral_PrincipalEcogasto.jpg" alt="">
+      <div class="app-hero-texto">
+        <h1>Hola, <span id="saludoNombre">—</span></h1>
+        <p id="resumenHogar">—</p>
+      </div>
+      <button type="button" class="btn-app btn-app--claro" id="btnEditarHogarAtajo">✏️ Editar hogar</button>
+    </div>
+
+    <div class="aviso-app" id="avisoConsumo" hidden></div>
+
+    <div class="kpis" id="kpisConsumo"></div>
+
+    <!-- Una tarjeta por servicio; se generan segun los servicios del hogar -->
+    <div class="recursos-grid" id="TarjetasRecursos"></div>
+
+    <div class="consumo-layout">
+
+      <!-- HU05: grafico mensual frente al promedio nacional de la zona -->
+      <div class="app-bloque" id="ContenedorGrafico">
+        <div class="bloque-cabecera">
+          <h2 id="TituloGrafico">Consumo mensual</h2>
+          <div class="controles">
+            <label for="recursoGrafico" class="sr-only">Servicio</label>
+            <select id="recursoGrafico"></select>
+            <label for="anioGrafico" class="sr-only">Año</label>
+            <select id="anioGrafico"></select>
+          </div>
+        </div>
+        <p class="bloque-nota">La línea punteada es el promedio nacional de referencia para tu zona, definido en la tabla de tarifas.</p>
+        <div class="grafico-caja" id="graficoCaja"><canvas id="graficoPorRecurso"></canvas></div>
+        <div class="vacio" id="graficoVacio" hidden>
+          <p id="graficoVacioTexto">Aún no registras lecturas de este servicio.</p>
+          <br>
+          <button type="button" class="btn-app" id="btnIrRegistrar">Registrar lectura</button>
+        </div>
+      </div>
+
+      <!-- HU04: registrar o corregir una lectura -->
+      <div class="app-bloque" id="bloqueLectura">
+        <h2 id="tituloLectura">Registrar lectura</h2>
+        <p class="bloque-nota">Anota el consumo de tu recibo del mes. No se pueden registrar meses futuros ni repetir un mes ya registrado.</p>
+
+        <form id="formLectura" novalidate>
+          <input type="hidden" id="lecturaId">
+
+          <div class="campo">
+            <label for="lecturaRecurso">Servicio</label>
+            <select id="lecturaRecurso" required></select>
+          </div>
+
+          <div class="campo-fila">
+            <div class="campo">
+              <label for="lecturaMes">Mes</label>
+              <select id="lecturaMes" required></select>
+            </div>
+            <div class="campo">
+              <label for="lecturaAnio">Año</label>
+              <input type="number" id="lecturaAnio" min="2024" step="1" required>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="lecturaValor">Valor <span class="unidad" id="lecturaUnidad"></span></label>
+            <input type="number" id="lecturaValor" min="0.01" step="0.01" required>
+            <small class="campo-ayuda" id="lecturaAyuda">Agua en L/día por persona, luz en kWh, gas en m³ y transporte en soles al mes.</small>
+          </div>
+
+          <p class="costo-preview" id="lecturaCostoPreview"></p>
+          <p class="form-msg" id="msg-lectura" role="alert"></p>
+
+          <div class="form-acciones">
+            <button type="button" class="btn-app btn-app--claro" id="btnCancelarEdicion" hidden>Cancelar edición</button>
+            <button type="submit" class="btn-app" id="btnGuardarLectura">Guardar lectura</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- HU04: historial con edicion y eliminacion -->
+    <div class="app-bloque">
+      <div class="bloque-cabecera">
+        <h2>Historial de lecturas</h2>
+        <div class="controles">
+          <label for="historialRecurso" class="sr-only">Filtrar por servicio</label>
+          <select id="historialRecurso"><option value="">Todos los servicios</option></select>
+        </div>
+      </div>
+      <div class="tabla-scroll">
+        <table class="tabla-app">
+          <thead>
+            <tr>
+              <th>Periodo</th>
+              <th>Servicio</th>
+              <th class="num">Valor</th>
+              <th>Unidad</th>
+              <th class="num">Costo estimado</th>
+              <th>Nivel en tu zona</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaHistorial"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== P06 · Impacto ambiental  (HU06) ===== -->
+  <div class="app-vista" id="ImpactoAmbiental" data-vista="impacto">
+
+    <div class="app-encabezado">
+      <div>
+        <h1>🌍 Impacto ambiental de tu consumo</h1>
+        <p>Traducimos tus lecturas del mes a kilogramos de CO₂ y a litros de agua para que veas tu huella.</p>
+      </div>
+      <div class="controles">
+        <label for="impactoPeriodo">Mes</label>
+        <select id="impactoPeriodo"></select>
+      </div>
+    </div>
+
+    <div class="app-bloque vacio" id="impactoVacio" hidden>
+      No tienes lecturas registradas. Registra tu consumo en <strong>Mi Consumo</strong> para calcular tu impacto.
+      <br><br>
+      <button type="button" class="btn-app" data-ir="consumo">Ir a Mi Consumo</button>
+    </div>
+
+    <div id="impactoContenido">
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-valor" id="co2-impacto">— kg CO₂</div>
+          <div class="kpi-etiqueta">Huella de carbono estimada del mes</div>
+        </div>
+        <div class="kpi kpi--azul">
+          <div class="kpi-valor" id="agua-impacto">— litros</div>
+          <div class="kpi-etiqueta">Agua consumida por todo el hogar en el mes</div>
+        </div>
+        <div class="kpi kpi--amarillo">
+          <div class="kpi-valor" id="costo-impacto">S/ —</div>
+          <div class="kpi-etiqueta">Gasto estimado del mes</div>
+        </div>
+      </div>
+
+      <div class="consumo-layout">
+        <div class="app-bloque">
+          <h2>Detalle por servicio</h2>
+          <div class="tabla-scroll">
+            <table class="tabla-app">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th class="num">Valor</th>
+                  <th>Unidad</th>
+                  <th class="num">kg CO₂</th>
+                </tr>
+              </thead>
+              <tbody id="tablaImpacto"></tbody>
+            </table>
+          </div>
+          <p class="bloque-nota" id="notaFactores" style="margin-top:12px;"></p>
+        </div>
+
+        <div class="app-bloque comparacion">
+          <h2>Comparación con el promedio nacional</h2>
+          <p class="bloque-nota">Se compara cada servicio del mes elegido con el promedio nacional de referencia de tu zona.</p>
+          <button type="button" class="btn-app" id="btnCompararPromedio">Comparar ahora</button>
+          <div id="resultadoComparacion" style="margin-top:14px;"></div>
+          <p class="bloque-nota" id="consejoImpacto" style="margin-top:14px;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== P07 · Eco Tip personalizado  (HU07) ===== -->
+  <div class="app-vista" id="EcoTips" data-vista="tips">
+
+    <div class="app-encabezado">
+      <div>
+        <h1>💡 Eco Tip personalizado</h1>
+        <p>El consejo se basa en el servicio en el que más te alejas del promedio nacional en tu último mes registrado.</p>
+      </div>
+    </div>
+
+    <div class="app-bloque tip-principal">
+      <div class="tip-meta">
+        <span class="etiqueta-origen" id="origenTip" hidden></span>
+        <span id="contextoTip"></span>
+      </div>
+      <p id="texto-tip">Aquí aparecerá tu recomendación…</p>
+      <div class="acciones-tip">
+        <button type="button" id="btn-tip-util">✔️ Sí me sirvió</button>
+        <button type="button" id="btn-tip-no-util">❌ No me ayudó</button>
+      </div>
+      <p class="form-msg ok" id="msg-tip" role="status"></p>
+      <button type="button" class="btn-app btn-app--claro" id="btnOtroTip">🔄 Generar otro tip</button>
+    </div>
+
+    <div class="consumo-layout">
+      <div class="app-bloque">
+        <h2>Más consejos de <span id="tipsRecursoNombre">tu servicio</span></h2>
+        <ul class="lista-tips" id="listaTipsCatalogo"></ul>
+      </div>
+      <div class="app-bloque">
+        <h2>Tus tips anteriores</h2>
+        <ul class="lista-tips" id="historialTips"></ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== P08 · Notificaciones  (HU08, HU09) ===== -->
+  <div class="app-vista" id="VistaNotificaciones" data-vista="notificaciones">
+
+    <div class="app-encabezado">
+      <div>
+        <h1>🔔 Tus notificaciones</h1>
+        <p id="resumenNotificaciones">—</p>
+      </div>
+    </div>
+
+    <div class="app-bloque">
+      <div id="contenedorNotificaciones"></div>
+      <div class="grupo-botones-notificaciones">
+        <button type="button" id="btnMarcarLeidas">✔ Marcar todas como leídas</button>
+        <button type="button" id="btnLimpiarNotificaciones">🗑 Eliminar todas</button>
+        <button type="button" id="btnPreferenciasNoti" data-ir="preferencias">⚙ Preferencias</button>
+        <button type="button" id="btnCerrarVistaNotificaciones" data-ir="consumo">Volver</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== P09 · Preferencias de notificacion  (HU09) ===== -->
+  <div class="app-vista" id="PreferenciasNotificaciones" data-vista="preferencias">
+
+    <div class="app-encabezado">
+      <div>
+        <h1>⚙️ Preferencias de notificación</h1>
+        <p>Elige de qué servicios quieres recibir alertas de consumo anómalo. Los cambios se aplican a las siguientes lecturas.</p>
+      </div>
+    </div>
+
+    <div class="app-bloque">
+      <form id="formPreferencias">
+        <fieldset>
+          <legend>Alertas de consumo anómalo</legend>
+          <label><input type="checkbox" id="prefAgua"> 💧 Agua</label>
+          <label><input type="checkbox" id="prefLuz"> ⚡ Luz</label>
+          <label><input type="checkbox" id="prefGas"> 🔥 Gas</label>
+          <label><input type="checkbox" id="prefTransporte"> 🚌 Transporte</label>
+        </fieldset>
+        <fieldset>
+          <legend>Otros avisos</legend>
+          <label><input type="checkbox" id="prefRetos"> Participar en retos sostenibles</label>
+          <label><input type="checkbox" id="prefWeeklyReminder"> Recordatorio semanal para registrar mi consumo</label>
+        </fieldset>
+        <p class="form-msg" id="msg-preferencias" role="status"></p>
+        <button type="submit">Guardar</button>
+        <button type="button" id="cerrarPreferencias" data-ir="notificaciones">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ===== P10 · Comparar con hogares similares  (HU10) ===== -->
+  <div class="app-vista" id="CompararHogares" data-vista="comparar">
+
+    <div class="app-encabezado">
+      <div>
+        <h1>📊 Comparación con otros hogares</h1>
+        <p>Solo se comparan hogares de tu misma zona con una persona más o una menos que el tuyo.
+           Tu hogar no entra en el promedio y no se muestra ningún dato personal de los demás.</p>
+      </div>
+      <div class="controles">
+        <label for="compararPeriodo">Mes</label>
+        <select id="compararPeriodo"></select>
+      </div>
+    </div>
+
+    <div class="app-bloque vacio" id="compararVacio" hidden></div>
+
+    <div id="compararContenido">
+      <div class="consumo-layout">
+        <div class="app-bloque">
+          <h2>Diferencia frente a hogares similares</h2>
+          <div class="grafico-caja"><canvas id="chartSim"></canvas></div>
+        </div>
+        <div class="app-bloque">
+          <h2>Detalle</h2>
+          <div class="tabla-scroll">
+            <table class="tabla-app">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th class="num">Mi valor</th>
+                  <th class="num">Similares</th>
+                  <th class="num">Diferencia</th>
+                  <th class="num">Hogares</th>
+                </tr>
+              </thead>
+              <tbody id="tablaComparar"></tbody>
+            </table>
+          </div>
+          <p id="mensajeComparacion" class="mensaje-comparacion"></p>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" id="btnVolverComparar" class="btn-app btn-app--claro" data-ir="consumo">← Volver a Mi Consumo</button>
+  </div>
+
+
+  <!-- ===== P11 · Estadisticas locales  (HU11) ===== -->
+  <div class="app-vista" id="EstadisticasLocales" data-vista="estadisticas">
+
+    <div class="app-encabezado">
+      <div>
+        <h1>📈 Estadísticas locales</h1>
+        <p>Consumo promedio mensual de todos los hogares de la zona elegida. Tu zona aparece seleccionada por defecto.</p>
+      </div>
+      <div class="controles">
+        <label for="zonaSelect">Zona</label>
+        <select id="zonaSelect"></select>
+        <label for="anioEstadisticas">Año</label>
+        <select id="anioEstadisticas"></select>
+      </div>
+    </div>
+
+    <div class="kpis" id="kpisZona"></div>
+    <div class="app-bloque vacio" id="estadisticasVacio" hidden>
+      No hay lecturas registradas en esta zona para el año elegido.
+    </div>
+    <div class="grid-estadisticas" id="gridEstadisticas"></div>
+
+    <button type="button" id="btnCerrarEstadisticas" class="btn-app btn-app--claro" data-ir="consumo">← Volver a Mi Consumo</button>
+  </div>
+
+</section>
+
+
+
+
+
+<!-- ===== P04 · Informacion del hogar  (HU03) ===== -->
+<div id="FormularioHogarModal" class="modal-formulario" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="tituloHogar">
+  <div class="contenido-formulario">
+    <h2 id="tituloHogar">🏡 Información de tu hogar</h2>
+    <p class="nota-modal">Con estos datos calculamos tus costos, tu impacto ambiental y con qué hogares compararte.</p>
+
+    <form id="formHogarLogin" novalidate>
+      <div class="campo">
+        <label class="casilla-simple"><input type="checkbox" id="esPadre"> Soy padre o madre de familia</label>
+      </div>
+
+      <div class="campo-fila">
+        <div class="campo">
+          <label for="hogarPersonas">Personas en el hogar</label>
+          <input type="number" id="hogarPersonas" min="1" max="20" step="1" required>
+        </div>
+        <div class="campo">
+          <label for="hogarZona">Zona</label>
+          <select id="hogarZona" required></select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <span class="campo-titulo">Servicios con los que cuenta tu hogar</span>
+        <div class="casillas" id="hogarServicios"></div>
+        <small class="campo-ayuda">Solo podrás registrar lecturas de los servicios que marques.</small>
+      </div>
+
+      <p class="form-msg" id="msg-hogar" role="alert"></p>
+
+      <div class="form-acciones">
+        <button type="button" class="btn-app btn-app--claro" id="btnCancelarHogar">Cancelar</button>
+        <button type="submit" class="btn-app" id="btnGuardarHogar">Guardar y continuar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ===== Terminos y condiciones  (HU01 CA5) ===== -->
+<div id="ModalTerminos" class="modal-formulario" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="tituloTerminos">
+  <div class="contenido-formulario">
+    <h2 id="tituloTerminos">Términos y condiciones</h2>
+    <ol class="lista-terminos">
+      <li>EcoGasto usa los datos de tu hogar y tus lecturas solo para calcular tus costos, tu impacto ambiental y comparaciones anónimas.</li>
+      <li>Tu nombre y tu correo no se muestran a otros usuarios. En el ranking y en la comunidad solo aparece tu nombre de usuario.</li>
+      <li>Los costos son estimaciones con las tarifas de tu zona; el monto real depende de tu proveedor.</li>
+      <li>Puedes cambiar tus preferencias de notificación cuando quieras.</li>
+      <li>Prototipo académico: la información se guarda en este navegador.</li>
+    </ol>
+    <div class="form-acciones">
+      <button type="button" class="btn-app" id="btnCerrarTerminos">Entendido</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== Aviso para visitantes que pulsan un modulo ===== -->
+<div id="AlertaRegistro" class="modal-alerta" style="display:none;" role="dialog" aria-modal="true">
+  <div class="contenido-alerta">
+    <p>Regístrate para acceder a este módulo y obtener todos los beneficios.</p>
+    <div class="acciones-alerta">
+      <button type="button" id="CerrarAlertaRegistro" class="btn-secundario">Ahora no</button>
+      <button type="button" id="IrARegistro" class="btn-registrar">Ir a Registro</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== P02 · Grafico de ejemplo de la landing  (HU05) ===== -->
+<div class="ContenedorGrafico" id="GraficoDemo" role="dialog" aria-modal="true" aria-labelledby="TituloGraficoDemo">
+  <button type="button" id="CerrarGraficoDemo" class="btn-cerrar-grafico" aria-label="Cerrar">✖</button>
+  <h3 id="TituloGraficoDemo">Consumo</h3>
+  <div class="grafico-demo-caja"><canvas id="graficoDemo"></canvas></div>
+  <p class="nota-demo">Datos de un hogar de ejemplo. El promedio nacional sale de la tabla de tarifas que mantiene el administrador.
+     Regístrate para ver tu propio consumo.</p>
+</div>
+
+
+<!-- ===== P12 - P14 · Social Media  (HU12, HU13, HU14) ===== -->
+<div class="modal-overlay" id="socialMediaModal" style="display:none;"
+     role="dialog" aria-modal="true" aria-labelledby="tituloSocial">
+  <div class="modal-container">
+
+    <div class="modal-header">
+      <div class="modal-title" id="tituloSocial">🌱 Social Media · EcoGasto</div>
+      <div class="modal-puntos"><span id="puntosSocial">0</span> pts</div>
+      <button type="button" class="close-btn" id="btnCerrarSocial" aria-label="Cerrar">&times;</button>
+    </div>
+
+    <div class="tab-navigation" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="achievements">Mis Logros</button>
+      <button type="button" class="tab-btn" data-tab="community">Comunidad</button>
+      <button type="button" class="tab-btn" data-tab="photos">Fotos</button>
+      <button type="button" class="tab-btn" data-tab="summary">Resumen</button>
+      <button type="button" class="tab-btn" data-tab="reto">Reto Sostenible</button>
+      <button type="button" class="tab-btn" data-tab="ranking">Ranking</button>
+    </div>
+
+    <div class="tab-content">
+
+      <!-- Logros: insignias y retos completados (HU14, EP29) -->
+      <div id="achievements" class="tab-panel active">
+        <p class="nota-tab">Tus logros salen de los retos que completaste y de las insignias que ganaste.</p>
+        <div id="listaLogros"></div>
+      </div>
+
+      <!-- Comunidad (HU14, EP31-EP33) -->
+      <div id="community" class="tab-panel">
+        <form class="new-comment" id="formPublicacion" novalidate>
+          <label for="commentInput" class="sr-only">¿Qué quieres compartir?</label>
+          <textarea id="commentInput" maxlength="500" rows="3"
+                    placeholder="Comparte un avance o un consejo con la comunidad (máximo 500 caracteres)"></textarea>
+          <div class="fila-publicar">
+            <label for="publicacionImagenUrl" class="sr-only">URL de una foto</label>
+            <input type="url" id="publicacionImagenUrl" placeholder="URL de una foto (opcional)">
+            <span class="contador-caracteres" id="contadorPublicacion">0 / 500</span>
+            <button type="submit" id="submitComment">Publicar</button>
+          </div>
+          <p class="form-msg" id="msg-publicacion" role="alert"></p>
+        </form>
+        <div id="commentList"></div>
+      </div>
+
+      <!-- Fotos: publicaciones con imagen (HU14) -->
+      <div id="photos" class="tab-panel">
+        <div class="photo-upload-area" id="zonaSubirFoto" role="button" tabindex="0">
+          <div class="upload-icon">📸</div>
+          <h3>Comparte tus acciones sostenibles</h3>
+          <p>Arrastra una foto aquí o haz clic para seleccionarla</p>
+          <input type="file" id="photoInput" accept="image/*" hidden>
+        </div>
+
+        <div class="foto-nueva" id="fotoNueva" hidden>
+          <img id="photoPreview" alt="Vista previa de la foto">
+          <div>
+            <label for="photoCaption" class="sr-only">Descripción</label>
+            <textarea id="photoCaption" maxlength="500" rows="3" placeholder="Describe tu acción sostenible"></textarea>
+            <p class="form-msg" id="msg-foto" role="alert"></p>
+            <div class="form-acciones">
+              <button type="button" class="btn-app btn-app--claro" id="btnCancelarFoto">Cancelar</button>
+              <button type="button" class="btn-app" id="btnPublicarFoto">Publicar foto</button>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="subtitulo-tab">Fotos de la comunidad</h3>
+        <div class="photo-gallery" id="photoGallery"></div>
+
+        <h3 class="subtitulo-tab">Ideas para inspirarte</h3>
+        <div class="photo-gallery">
+          <div class="photo-item">
+            <img src="Imagenes/cultivando.jpg" alt="Huerto en casa">
+            <div class="photo-overlay"><strong>Mi jardín sostenible</strong><br>Cultivando mis propias verduras 🌱</div>
+          </div>
+          <div class="photo-item">
+            <img src="Imagenes/panelsolar.jpg.webp" alt="Panel solar">
+            <div class="photo-overlay"><strong>Panel solar instalado</strong><br>¡Energía limpia en casa! ☀️</div>
+          </div>
+          <div class="photo-item">
+            <img src="Imagenes/bicicleta.jpg" alt="Bicicleta">
+            <div class="photo-overlay"><strong>Transporte ecológico</strong><br>Al trabajo en bicicleta 🚴‍♂️</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen de logros para compartir (HU14, EP34) -->
+      <div id="summary" class="tab-panel">
+        <div class="summary-card" id="tarjetaResumen">
+          <div class="summary-title">🌟 Mi resumen EcoGasto</div>
+          <div class="summary-period" id="resumenPeriodo">—</div>
+          <div class="summary-stats">
+            <div class="summary-stat">
+              <div class="summary-stat-value" id="resPuntos">0</div>
+              <div class="summary-stat-label">Puntos</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-value" id="resRetos">0</div>
+              <div class="summary-stat-label">Retos completados</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-value" id="resInsignias">0</div>
+              <div class="summary-stat-label">Insignias</div>
+            </div>
+            <div class="summary-stat">
+              <div class="summary-stat-value" id="resCosto">S/ 0</div>
+              <div class="summary-stat-label">Gasto del último mes</div>
+            </div>
+          </div>
+          <p class="summary-variacion" id="resVariacion"></p>
+          <!-- data-html2canvas-ignore: los botones no salen en la imagen descargada -->
+          <div class="summary-acciones" data-html2canvas-ignore>
+            <button type="button" class="download-btn" id="btnDescargarResumen">📥 Descargar infografía</button>
+            <button type="button" class="share-btn share-whatsapp"  data-compartir="whatsapp">📱 WhatsApp</button>
+            <button type="button" class="share-btn share-facebook"  data-compartir="facebook">📘 Facebook</button>
+            <button type="button" class="share-btn share-instagram" data-compartir="instagram">📸 Instagram</button>
+          </div>
+        </div>
+
+        <div class="resumen-bloque">
+          <h3>📊 Gasto estimado por mes</h3>
+          <div class="resumen-comparativa" id="resComparativa"></div>
+        </div>
+      </div>
+
+      <!-- Retos sostenibles e insignias (HU12, EP25-EP29) -->
+      <div id="reto" class="tab-panel">
+        <p class="nota-tab" id="mensajeReto">
+          Únete a un reto y, cuando registres tu siguiente lectura, márcalo como completado.
+          Se valida con tus dos últimas lecturas del servicio.
+        </p>
+        <div id="challengesContainer"></div>
+        <div id="insigniasContainer">
+          <h3>🏅 Insignias</h3>
+          <div class="insignias-list"></div>
+        </div>
+      </div>
+
+      <!-- Ranking sostenible (HU13, EP30) -->
+      <div id="ranking" class="tab-panel">
+        <div class="ranking-filters" id="rankingFiltros"></div>
+        <div id="rankingContainer"></div>
+        <p class="nota-tab" id="miPosicionRanking"></p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Mensaje flotante de confirmacion -->
+<div class="toast-usuario" id="toastUsuario" role="status" aria-live="polite"></div>
+
+<footer class="site-footer">
+  © 2026 EcoGasto. Todos los derechos reservados.
+</footer>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script src="JS/EcoGastoData.js"></script>
+<script src="JS/EcoGastoUsuario.js"></script>
+<script src="JS/EcoGastoSocial.js"></script>
+
+</body>
+</html>

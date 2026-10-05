@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de administracion — EcoGasto</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Nunito:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="CSS/Admin.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<section class="acceso" id="Acceso">
+  <div class="acceso-tarjeta">
+
+    <div class="acceso-marca">
+      <img src="Imagenes/LOGO.png" alt="">
+      <h1>EcoGasto
+        <span>Panel de administracion</span>
+      </h1>
+    </div>
+
+    <p class="acceso-intro">
+      Acceso restringido al personal autorizado. Ingrese con su cuenta de administrador
+      para gestionar los datos maestros de la plataforma.
+    </p>
+
+    <div id="AvisoAcceso" style="display:none;"></div>
+
+    <form id="FormAcceso" autocomplete="off">
+      <div class="campo">
+        <label for="acceso-usuario">Usuario</label>
+        <input type="text" id="acceso-usuario" required autocomplete="username">
+      </div>
+
+      <div class="campo">
+        <label for="acceso-contrasena">Contrasena</label>
+        <input type="password" id="acceso-contrasena" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="boton boton--ancho">Ingresar al panel</button>
+    </form>
+
+    <div class="credenciales-demo">
+      Cuenta de demostracion: usuario <strong>admin</strong> / contrasena <strong>EcoGasto2025</strong>.
+      Una cuenta de usuario comun puede iniciar sesion en la plataforma, pero es rechazada aqui
+      por no contar con el rol de administrador.
+    </div>
+
+    <a href="EcoGasto.html" class="acceso-volver">Volver a la pagina principal</a>
+  </div>
+</section>
+
+
+<div class="panel" id="Panel">
+
+  <!-- ---------- Barra lateral ---------- -->
+  <aside class="lateral">
+    <div class="lateral-marca">
+      <img src="Imagenes/LOGO.png" alt="">
+      <h2>EcoGasto
+        <span>Administracion</span>
+      </h2>
+    </div>
+
+    <nav aria-label="Secciones del panel">
+      <ul>
+        <li><button type="button" class="activo" data-vista="resumen">Resumen general</button></li>
+        <li><button type="button" data-vista="usuarios">Usuarios y hogares</button></li>
+        <li><button type="button" data-vista="consumos">Registros de consumo</button></li>
+        <li><button type="button" data-vista="tarifas">Tarifas y umbrales</button></li>
+        <li><button type="button" data-vista="zonas">Zonas</button></li>
+        <li><button type="button" data-vista="tips">Eco Tips</button></li>
+        <li><button type="button" data-vista="retos">Retos sostenibles</button></li>
+        <li><button type="button" data-vista="auditoria">Auditoria</button></li>
+      </ul>
+    </nav>
+
+    <div class="lateral-pie">
+      <p>
+        Sesion iniciada
+        <strong id="AdminNombre">—</strong>
+      </p>
+      <button type="button" class="boton boton--claro boton--pequeno" id="BtnSalir">Cerrar sesion</button>
+    </div>
+  </aside>
+
+
+  <!-- ---------- Contenido ---------- -->
+  <main class="contenido">
+
+    <section class="vista activa" id="vista-resumen">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Resumen general</h1>
+          <p>Estadisticas calculadas sobre la totalidad de usuarios registrados en la plataforma.
+             Los umbrales que clasifican el consumo se definen en la seccion Tarifas y umbrales.</p>
+        </div>
+        <button type="button" class="boton boton--claro" id="BtnRecalcular">Recalcular</button>
+      </div>
+
+      <div class="indicadores" id="Indicadores"></div>
+
+      <div class="bloque">
+        <div class="bloque-titulo">
+          <h2>Nivel de consumo de todos los usuarios</h2>
+          <select id="FiltroVistaConsumo" aria-label="Modo de visualizacion">
+            <option value="porcentaje">Ver en porcentaje</option>
+            <option value="cantidad">Ver en cantidad de usuarios</option>
+          </select>
+        </div>
+        <p class="bloque-nota">
+          Cada usuario se clasifica comparando su consumo promedio de los ultimos seis meses
+          contra el umbral de su zona. Solo se consideran los hogares que cuentan con el servicio.
+        </p>
+        <div class="grafico"><canvas id="ChartDistribucion"></canvas></div>
+      </div>
+
+      <div class="doble-columna">
+        <div class="bloque">
+          <h2>Carencias por zona</h2>
+          <p class="bloque-nota">
+            Porcentaje de hogares que no cuentan con cada servicio, segun la region declarada al registrarse.
+          </p>
+          <div class="grafico"><canvas id="ChartCarencias"></canvas></div>
+        </div>
+
+        <div class="bloque">
+          <div class="bloque-titulo">
+            <h2>Consumo promedio mensual</h2>
+            <select id="FiltroRecursoSerie" aria-label="Servicio a graficar"></select>
+          </div>
+          <p class="bloque-nota">
+            Evolucion del promedio de los hogares de cada zona entre enero y junio.
+          </p>
+          <div class="grafico"><canvas id="ChartSerie"></canvas></div>
+        </div>
+      </div>
+
+      <div class="bloque">
+        <h2>Lectura por zona</h2>
+        <p class="bloque-nota">
+          Sintesis operativa: donde se concentra la mayor demanda y que servicio falta con mas frecuencia.
+        </p>
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Zona</th>
+                <th class="numero">Hogares</th>
+                <th class="numero">Personas</th>
+                <th class="numero">Agua (L/dia p.p.)</th>
+                <th class="numero">Luz (kWh/mes)</th>
+                <th class="numero">Gas (m3/mes)</th>
+                <th class="numero">Transporte (S//mes)</th>
+                <th class="numero">Gasto estimado</th>
+                <th>Carencia principal</th>
+              </tr>
+            </thead>
+            <tbody id="TablaZonas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bloque">
+        <h2>Hallazgos que requieren atencion</h2>
+        <p class="bloque-nota">
+          Generado automaticamente a partir de los datos vigentes. Se actualiza al modificar los umbrales.
+        </p>
+        <ul class="hallazgos" id="Hallazgos"></ul>
+      </div>
+    </section>
+
+
+    
+    <section class="vista" id="vista-usuarios">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Usuarios y hogares</h1>
+          <p>Registro de cuentas y de la informacion del hogar asociada. El administrador puede
+             dar de alta, editar y eliminar registros.</p>
+        </div>
+        <button type="button" class="boton" data-nuevo="usuarios">Agregar usuario</button>
+      </div>
+
+      <div class="bloque">
+        <div class="barra-herramientas">
+          <input type="search" id="BuscarUsuarios" placeholder="Buscar por usuario, nombre o correo">
+          <select id="FiltroZonaUsuarios"><option value="">Todas las zonas</option></select>
+          <select id="FiltroSegmentoUsuarios"><option value="">Todos los segmentos</option></select>
+          <span class="separador"></span>
+          <button type="button" class="boton boton--claro boton--pequeno" data-exportar="usuarios">Exportar CSV</button>
+        </div>
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Segmento</th>
+                <th>Zona</th>
+                <th class="numero">Personas</th>
+                <th>Servicios</th>
+                <th>Origen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="TablaUsuarios"></tbody>
+          </table>
+        </div>
+        <div class="paginacion" id="PaginacionUsuarios"></div>
+      </div>
+    </section>
+
+
+    
+    <section class="vista" id="vista-consumos">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Registros de consumo</h1>
+          <p>Lecturas mensuales por hogar y servicio. Son la base de todas las estadisticas del panel.</p>
+        </div>
+        <button type="button" class="boton" data-nuevo="consumos">Agregar lectura</button>
+      </div>
+
+      <div class="bloque">
+        <div class="barra-herramientas">
+          <input type="search" id="BuscarConsumos" placeholder="Buscar por usuario">
+          <select id="FiltroRecursoConsumos"><option value="">Todos los servicios</option></select>
+          <select id="FiltroMesConsumos"><option value="">Todos los meses</option></select>
+          <span class="separador"></span>
+          <button type="button" class="boton boton--claro boton--pequeno" data-exportar="consumos">Exportar CSV</button>
+        </div>
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Zona</th>
+                <th>Servicio</th>
+                <th>Mes</th>
+                <th class="numero">Valor</th>
+                <th>Unidad</th>
+                <th>Nivel</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="TablaConsumos"></tbody>
+          </table>
+        </div>
+        <div class="paginacion" id="PaginacionConsumos"></div>
+      </div>
+    </section>
+
+
+    
+    <section class="vista" id="vista-tarifas">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Tarifas y umbrales</h1>
+          <p>Tabla maestra del sistema. Define desde que valor se considera que un hogar consume
+             mucho o poco, y la tarifa con la que se estima el gasto. Al modificarla, las
+             estadisticas del resumen se recalculan.</p>
+        </div>
+        <button type="button" class="boton" data-nuevo="tarifas">Agregar parametro</button>
+      </div>
+
+      <div class="aviso aviso--dato">
+        Los valores iniciales toman como referencia las cifras citadas en el informe:
+        consumo de agua de 175 L/dia por persona en Lima frente a los 50-100 L recomendados por la OMS,
+        y un promedio de 82,3 kWh mensuales por hogar segun la encuesta ERCUE.
+      </div>
+
+      <div class="bloque">
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Zona</th>
+                <th>Unidad</th>
+                <th class="numero">Umbral bajo</th>
+                <th class="numero">Umbral alto</th>
+                <th class="numero">Promedio nacional</th>
+                <th class="numero">Tarifa (S/)</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="TablaTarifas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    
+    <section class="vista" id="vista-zonas">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Zonas</h1>
+          <p>Regiones naturales sobre las que se agrupan los hogares y se calculan las carencias.</p>
+        </div>
+        <button type="button" class="boton" data-nuevo="zonas">Agregar zona</button>
+      </div>
+
+      <div class="bloque">
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Zona</th>
+                <th>Descripcion</th>
+                <th class="numero">Hogares</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="TablaZonasCrud"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    
+    <section class="vista" id="vista-tips">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Eco Tips</h1>
+          <p>Recomendaciones que la plataforma muestra a los usuarios segun el servicio y el segmento.</p>
+        </div>
+        <button type="button" class="boton" data-nuevo="tips">Agregar tip</button>
+      </div>
+
+      <div class="bloque">
+        <div class="barra-herramientas">
+          <input type="search" id="BuscarTips" placeholder="Buscar en el texto del tip">
+          <select id="FiltroRecursoTips"><option value="">Todos los servicios</option></select>
+        </div>
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Segmento</th>
+                <th>Recomendacion</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="TablaTips"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    
+    <section class="vista" id="vista-retos">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Retos sostenibles</h1>
+          <p>Desafios semanales que otorgan puntos y alimentan el ranking de la plataforma.</p>
+        </div>
+        <button type="button" class="boton" data-nuevo="retos">Agregar reto</button>
+      </div>
+
+      <div class="bloque">
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Titulo</th>
+                <th>Servicio</th>
+                <th>Descripcion</th>
+                <th class="numero">Meta</th>
+                <th class="numero">Puntos</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="TablaRetos"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="vista" id="vista-auditoria">
+      <div class="contenido-encabezado">
+        <div>
+          <h1>Auditoria</h1>
+          <p>Registro de los accesos y de cada alta, modificacion o eliminacion realizada desde el panel.</p>
+        </div>
+        <button type="button" class="boton boton--claro" data-exportar="auditoria">Exportar CSV</button>
+      </div>
+
+      <div class="bloque">
+        <div class="barra-herramientas">
+          <input type="search" id="BuscarAuditoria" placeholder="Buscar por accion, tabla o detalle">
+          <span class="separador"></span>
+          <button type="button" class="boton boton--claro boton--pequeno" id="BtnReiniciarDatos">
+            Restablecer datos de demostracion
+          </button>
+        </div>
+        <div class="tabla-marco">
+          <table class="datos">
+            <thead>
+              <tr>
+                <th>Fecha y hora</th>
+                <th>Administrador</th>
+                <th>Accion</th>
+                <th>Tabla</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="TablaAuditoria"></tbody>
+          </table>
+        </div>
+        <div class="paginacion" id="PaginacionAuditoria"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+
+<div class="modal" id="Modal">
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="ModalTitulo">
+    <div class="modal-cabecera">
+      <h3 id="ModalTitulo">Registro</h3>
+      <button type="button" class="modal-cerrar" id="ModalCerrar" aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="ModalForm">
+      <div class="modal-cuerpo" id="ModalCuerpo"></div>
+      <div class="modal-pie">
+        <button type="button" class="boton boton--claro" id="ModalCancelar">Cancelar</button>
+        <button type="submit" class="boton" id="ModalGuardar">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="notificacion" id="Notificacion" role="status" aria-live="polite"></div>
+
+<script src="JS/EcoGastoData.js"></script>
+<script src="JS/Admin.js"></script>
+
+</body>
+</html>
